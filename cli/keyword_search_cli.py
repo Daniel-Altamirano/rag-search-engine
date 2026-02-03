@@ -2,7 +2,9 @@
 
 import argparse
 import json
+import string
 from pathlib import Path
+
 
 
 def main() -> None:
@@ -21,9 +23,9 @@ def main() -> None:
             movies_json = Path(__file__).resolve().parent.parent / "data" / "movies.json"
             with movies_json.open() as f:
                 data = json.load(f)
-
+            remove_punctuation = str.maketrans("", "", string.punctuation)
             for info in data.get("movies", ""):
-                if args.query.lower() in info.get("title", "").lower():
+                if args.query.lower().translate(remove_punctuation) in info.get("title", "").lower().translate(remove_punctuation):
                     keyword_matches.append({"id": info["id"], "title": info["title"]})
 
             sorted_keyword_matches = sorted(keyword_matches, key=lambda x: x["id"])
