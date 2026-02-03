@@ -6,7 +6,6 @@ import string
 from pathlib import Path
 
 
-
 def main() -> None:
     parser = argparse.ArgumentParser(description="Keyword Search CLI")
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
@@ -19,13 +18,16 @@ def main() -> None:
     match args.command:
         case "search":
             print(f"Searching for: {args.query}")
-            keyword_matches = []
             movies_json = Path(__file__).resolve().parent.parent / "data" / "movies.json"
             with movies_json.open() as f:
                 data = json.load(f)
+            
+            keyword_matches = []
             remove_punctuation = str.maketrans("", "", string.punctuation)
+            search_tokens = args.query.lower().translate(remove_punctuation).split()
             for info in data.get("movies", ""):
-                if args.query.lower().translate(remove_punctuation) in info.get("title", "").lower().translate(remove_punctuation):
+                processed_title = info.get("title", "").lower().translate(remove_punctuation).split()
+                if title_matches(search_tokens, processed_title):
                     keyword_matches.append({"id": info["id"], "title": info["title"]})
 
             sorted_keyword_matches = sorted(keyword_matches, key=lambda x: x["id"])
@@ -34,6 +36,11 @@ def main() -> None:
             
         case _:
             parser.print_help()
+
+def title_matches(search_tokens, processed_title):
+    return any(search_token in title_word
+               for search_token in search_tokens
+               for title_word in processed_title)
 
 
 if __name__ == "__main__":
