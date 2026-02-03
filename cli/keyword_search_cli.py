@@ -22,8 +22,8 @@ def main() -> None:
             with movies_json.open() as f:
                 data = json.load(f)
 
-            for info in data["movies"]:
-                if args.query in info["title"]:
+            for info in data.get("movies", ""):
+                if args.query.lower() in info.get("title", "").lower():
                     keyword_matches.append({"id": info["id"], "title": info["title"]})
 
             sorted_keyword_matches = sorted(keyword_matches, key=lambda x: x["id"])
