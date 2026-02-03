@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import argparse
+import json
+from pathlib import Path
 
 
 def main() -> None:
@@ -14,9 +16,20 @@ def main() -> None:
 
     match args.command:
         case "search":
-            # print the search query here
             print(f"Searching for: {args.query}")
-            pass
+            keyword_matches = []
+            movies_json = Path(__file__).resolve().parent.parent / "data" / "movies.json"
+            with movies_json.open() as f:
+                data = json.load(f)
+
+            for info in data["movies"]:
+                if args.query in info["title"]:
+                    keyword_matches.append({"id": info["id"], "title": info["title"]})
+
+            sorted_keyword_matches = sorted(keyword_matches, key=lambda x: x["id"])
+            for i, info in enumerate(sorted_keyword_matches[:5]):
+                print(f"{i + 1}. {info['title']}")
+            
         case _:
             parser.print_help()
 
