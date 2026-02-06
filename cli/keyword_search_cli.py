@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 
 import argparse
-import json
-import string
-from pathlib import Path
 
+from lib.keyword_search import search_command
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Keyword Search CLI")
@@ -18,21 +16,9 @@ def main() -> None:
     match args.command:
         case "search":
             print(f"Searching for: {args.query}")
-            movies_json = Path(__file__).resolve().parent.parent / "data" / "movies.json"
-            with movies_json.open() as f:
-                data = json.load(f)
-            
-            keyword_matches = []
-            remove_punctuation = str.maketrans("", "", string.punctuation)
-            search_tokens = args.query.lower().translate(remove_punctuation).split()
-            for info in data.get("movies", ""):
-                processed_title = info.get("title", "").lower().translate(remove_punctuation).split()
-                if title_matches(search_tokens, processed_title):
-                    keyword_matches.append({"id": info["id"], "title": info["title"]})
-
-            sorted_keyword_matches = sorted(keyword_matches, key=lambda x: x["id"])
-            for i, info in enumerate(sorted_keyword_matches[:5]):
-                print(f"{i + 1}. {info['title']}")
+            results = search_command(args.query)
+            for i, res in enumerate(results, 1):
+                print(f"{i}. {res['title']}")
             
         case _:
             parser.print_help()
